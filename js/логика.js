@@ -176,7 +176,7 @@ function показатьИнфоАвтора(данные) {
     
     // Заполняем группы
     const навигация = document.getElementById('author-nav');
-    let html = '';
+    let html = `<div class="nav-item active" style="margin-bottom: 20px; font-weight: 600;" onclick="фильтроватьПоКатегории('')">ВСЕ ИДЕИ</div>`;
     
     данные.группы.forEach(группа => {
         html += `<div class="author-group-title">${группа.название}</div>`;
