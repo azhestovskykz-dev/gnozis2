@@ -72,6 +72,7 @@ async function загрузитьГлобальноеМеню() {
         {
             категория: "ЭЗОТЕРИКА И ОСМЫСЛЕНИЕ",
             авторы: [
+                { id: "УГ_Кришнамурти", имя: "У.Г. КРИШНАМУРТИ" },
                 { id: "Стрельникова_Секлитова", имя: "Л. СЕКЛИТОВА И Л. СТРЕЛЬНИКОВА" }
             ]
         }
@@ -339,9 +340,13 @@ function показатьИнфоАвтора(данные) {
     if (данные.фото) {
         photoEl.style.backgroundImage = `url('${данные.фото}')`;
         photoEl.style.display = 'block';
+        photoEl.style.cursor = 'pointer';
+        photoEl.onclick = () => открытьПрофильАвтора(СОСТОЯНИЕ.автор);
+        photoEl.title = "Нажмите, чтобы открыть профиль автора";
     } else {
         photoEl.style.display = 'none';
         photoEl.style.backgroundImage = '';
+        photoEl.onclick = null;
     }
     
     // Заполняем группы
@@ -357,3 +362,76 @@ function показатьИнфоАвтора(данные) {
     
     навигация.innerHTML = html;
 }
+
+window.открытьПрофильАвтора = async function(авторId) {
+    if (!авторId) авторId = СОСТОЯНИЕ.автор;
+    const данные = ТЕКУЩИЕ_ДАННЫЕ;
+    if (!данные) return;
+
+    let профиль = {};
+    try {
+        const ответ = await fetch(`данные/${авторId}/профиль.json`);
+        if (ответ.ok) {
+            профиль = await ответ.json();
+        }
+    } catch(e) {}
+
+    document.getElementById('breadcrumb').innerText = `${данные.имя.toUpperCase()} > БИОГРАФИЯ И КНИГИ`;
+    const сцена = document.getElementById('stage');
+    
+    let galleryHtml = `<img src="${данные.фото}" alt="Портрет" style="width:100%; border-radius:12px; margin-bottom: 20px;">`;
+    
+    if (профиль.фотографии && профиль.фотографии.length > 0) {
+        профиль.фотографии.forEach(photo => {
+            galleryHtml += `<img src="${photo}" style="width:100%; border-radius:12px; margin-bottom: 10px;">`;
+        });
+    }
+
+    if (профиль.книги && профиль.книги.length > 0) {
+        galleryHtml += `<h3 style="margin-top: 20px; font-size: 16px; margin-bottom: 10px; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">ИЗДАННЫЕ КНИГИ</h3>`;
+        профиль.книги.forEach(book => {
+            galleryHtml += `
+                <div class="book-card" style="display: flex; gap: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    ${book.обложка ? `<img src="${book.обложка}" style="width: 80px; height: 110px; object-fit: cover; border-radius: 4px;">` : '<div style="width: 80px; height: 110px; background: var(--hover-bg); border-radius: 4px;"></div>'}
+                    <div>
+                        <h4 style="margin: 0 0 5px 0; font-size: 14px; color: #fff;">${book.название}</h4>
+                        <p style="margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.4;">${book.описание || ''}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    let bioHtml = `<h2 style="font-size: 32px; margin-top: 0; margin-bottom: 10px; color: #fff; text-transform: uppercase;">${данные.имя}</h2>`;
+    bioHtml += `<div style="color: var(--accent-color); font-weight: 600; letter-spacing: 2px; margin-bottom: 30px;">${данные.роль || 'АВТОР'}</div>`;
+    
+    if (профиль.достижения && профиль.достижения.length > 0) {
+        bioHtml += `<div style="margin-bottom: 30px; background: var(--hover-bg); padding: 20px; border-radius: 8px;">
+            <h4 style="margin-top: 0; margin-bottom: 15px; color: #fff; font-size: 16px;">ВКЛАД И ОСНОВНЫЕ ИДЕИ</h4>
+            <ul style="padding-left: 20px; color: var(--text-secondary); margin: 0; line-height: 1.6;">
+                ${профиль.достижения.map(d => `<li style="margin-bottom: 5px;">${d}</li>`).join('')}
+            </ul>
+        </div>`;
+    }
+
+    if (профиль.биография) {
+        let text = Array.isArray(профиль.биография) ? профиль.биография.join('<br><br>') : профиль.биография;
+        bioHtml += `<div style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); text-align: justify;">${text}</div>`;
+    } else {
+        bioHtml += `<div style="font-size: 16px; line-height: 1.8; color: var(--text-secondary);">Подробная биография и материалы находятся в разработке...</div>`;
+    }
+
+    сцена.innerHTML = `
+        <div class="author-profile-container" style="display: flex; gap: 40px; text-align: left; padding: 20px;">
+            <div class="author-gallery" style="flex: 0 0 320px; max-height: calc(100vh - 180px); overflow-y: auto; padding-right: 15px;">
+                ${galleryHtml}
+            </div>
+            <div class="author-bio" style="flex: 1; max-height: calc(100vh - 180px); overflow-y: auto; padding-right: 15px;">
+                ${bioHtml}
+            </div>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid var(--border-color);">
+            <button class="btn btn-secondary" onclick="выбратьАвтора('${авторId}')">← НАЗАД К СПИСКУ ИДЕЙ</button>
+        </div>
+    `;
+};
