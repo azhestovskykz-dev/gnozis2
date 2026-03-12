@@ -30,10 +30,13 @@ async function загрузитьГлобальноеМеню() {
     `).join('');
 }
 
+let ТЕКУЩИЕ_ДАННЫЕ = null;
+
 async function выбратьАвтора(имяПапки) {
     СОСТОЯНИЕ.автор = имяПапки;
     const ответ = await fetch(`данные/${имяПапки}/инфо.json`);
     const данные = await ответ.json();
+    ТЕКУЩИЕ_ДАННЫЕ = данные;
     
     // Обновляем хлебные крошки
     document.getElementById('breadcrumb').innerText = данные.имя;
@@ -45,12 +48,14 @@ async function выбратьАвтора(имяПапки) {
     показатьИнфоАвтора(данные);
 }
 
-function отрисоватьСеткуИдей(данные) {
+function отрисоватьСеткуИдей(данные, фильтрКатегория = null) {
     const сцена = document.getElementById('stage');
     let html = '<div class="ideas-grid">';
     
     данные.группы.forEach(группа => {
         группа.категории.forEach(кат => {
+            if (фильтрКатегория && кат.название !== фильтрКатегория) return;
+            
             кат.идеи.forEach((идея, индекс) => {
                 const id = ideaToId(идея, индекс + 1);
                 html += `
@@ -68,6 +73,20 @@ function отрисоватьСеткуИдей(данные) {
     html += '</div>';
     сцена.innerHTML = html;
 }
+
+function фильтроватьПоКатегории(названиеКатегории) {
+    document.getElementById('breadcrumb').innerText = `${ТЕКУЩИЕ_ДАННЫЕ.имя} > ${названиеКатегории}`;
+    отрисоватьСеткуИдей(ТЕКУЩИЕ_ДАННЫЕ, названиеКатегории);
+    
+    // Подсвечиваем активный пункт
+    document.querySelectorAll('#author-nav .nav-item').forEach(el => {
+        el.classList.remove('active');
+        if (el.innerText === названиеКатегории) {
+            el.classList.add('active');
+        }
+    });
+}
+
 
 function ideaToId(name, index) {
     return String(index).padStart(3, '0') + '_' + name.replace(/ /g, '_');
@@ -162,7 +181,7 @@ function показатьИнфоАвтора(данные) {
     данные.группы.forEach(группа => {
         html += `<div class="author-group-title">${группа.название}</div>`;
         группа.категории.forEach(кат => {
-            html += `<div class="nav-item">${кат.название}</div>`;
+            html += `<div class="nav-item" onclick="фильтроватьПоКатегории('${кат.название}')">${кат.название}</div>`;
         });
     });
     
