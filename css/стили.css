@@ -17,6 +17,25 @@
     padding: 0;
 }
 
+/* КАСТОМНЫЙ СКРОЛЛБАР */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #303e4d;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4a5c6f;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
@@ -93,8 +112,27 @@ h1, h2, h3 {
 }
 
 .sidebar-footer {
-    padding: 16px;
+    padding: 20px;
     border-top: 1px solid var(--border-color);
+}
+
+#admin-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+#admin-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-primary);
 }
 
 /* ОСНОВНОЙ КОНТЕНТ */
@@ -254,6 +292,63 @@ h1, h2, h3 {
 .btn-primary { background-color: var(--accent-color); color: white; }
 .btn-secondary { background-color: var(--hover-bg); color: var(--text-primary); }
 .btn-danger { background-color: var(--danger-color); color: white; }
+
+/* ПРАВАЯ ПАНЕЛЬ ИНФОРМАЦИИ */
+.info-panel {
+    width: 320px;
+    background-color: var(--sidebar-bg);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+.author-info {
+    padding: 32px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.author-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    margin: 0 auto 16px;
+    background-size: cover;
+    background-position: center;
+    border: 3px solid var(--card-bg);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.author-info h3 {
+    font-size: 22px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.author-info p {
+    font-size: 12px;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.author-nav-list {
+    padding: 16px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* СТИЛЬ ГРУПП АВТОРА */
+.author-group-title {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 16px 0 8px 12px;
+}
 
 /* АДМИНКА */
 .auth-ov {

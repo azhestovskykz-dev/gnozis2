@@ -155,4 +155,17 @@ function показатьИнфоАвтора(данные) {
     панель.classList.remove('hidden');
     document.getElementById('author-name').innerText = данные.имя;
     document.getElementById('author-role').innerText = данные.роль;
+    
+    // Заполняем группы
+    const навигация = document.getElementById('author-nav');
+    let html = '';
+    
+    данные.группы.forEach(группа => {
+        html += `<div class="author-group-title">${группа.название}</div>`;
+        группа.категории.forEach(кат => {
+            html += `<div class="nav-item">${кат.название}</div>`;
+        });
+    });
+    
+    навигация.innerHTML = html;
 }
