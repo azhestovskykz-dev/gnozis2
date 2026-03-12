@@ -254,6 +254,7 @@ async function выбратьАвтора(имяПапки) {
 function отрисоватьСеткуИдей(данные) {
     const сцена = document.getElementById('stage');
     let html = '';
+    let globalIndex = 1;
 
     данные.группы.forEach((группа, индексГруппы) => {
         html += `<h2 style="color:var(--accent-color);margin:24px 0 16px;text-transform:uppercase;font-size:16px;letter-spacing:1px;border-bottom:1px solid var(--border-color);padding-bottom:8px;">${группа.название}</h2>`;
@@ -270,8 +271,8 @@ function отрисоватьСеткуИдей(данные) {
                     <div class="ideas-grid" id="${containerId}">
             `;
 
-            кат.идеи.forEach((идея, индексИдеи) => {
-                const id = ideaToId(идея, индексИдеи + 1);
+            кат.идеи.forEach((идея) => {
+                const id = ideaToId(идея, globalIndex);
                 const safeIdea = идея.replace(/'/g, "\\'");
                 html += `
                     <div class="idea-card" onclick="открытьИдею('${id}', '${safeIdea}')">
@@ -281,6 +282,7 @@ function отрисоватьСеткуИдей(данные) {
                         </div>
                     </div>
                 `;
+                globalIndex++;
             });
 
             html += `
