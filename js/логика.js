@@ -173,36 +173,41 @@ async function открытьИдею(id, name) {
         
         document.getElementById('breadcrumb').innerText = `${СОСТОЯНИЕ.автор.replace('_', ' ')} > ${name}`;
         
-        const сцена = document.getElementById('stage');
+        let описаниеHtml = '';
+        if (данные.описание) {
+            if (данные.описание.стих) {
+                описаниеHtml += `<div class="idea-poem">${данные.описание.стих.replace(/\\n/g, '<br>')}</div>`;
+            }
+            if (данные.описание.притча) {
+                описаниеHtml += `<div class="description-section"><h5>Притча</h5><div class="description-content">${данные.описание.притча.replace(/\\n/g, '<br>')}</div></div>`;
+            }
+            for (const [ключ, значение] of Object.entries(данные.описание)) {
+                if (ключ !== 'стих' && ключ !== 'притча') {
+                    const заголовок = ключ.charAt(0).toUpperCase() + ключ.slice(1);
+                    описаниеHtml += `
+                    <div class="description-section">
+                        <h5>${заголовок}</h5>
+                        <div class="description-content">${значение.replace(/\\n/g, '<br>')}</div>
+                    </div>
+                    `;
+                }
+            }
+        } else if (данные.текст) {
+            описаниеHtml += `
+            <div class="description-section">
+                <h5>Суть идеи</h5>
+                <div class="description-content">${данные.текст.replace(/\\n/g, '<br>')}</div>
+            </div>
+            `;
+        }
+
         сцена.innerHTML = `
             <div class="idea-detail">
-                <h2 class="idea-title">${данные.идея}</h2>
+                <h2 class="idea-title">${данные.идея || данные.название}</h2>
                 
-                <div class="idea-image-full" style="width:100%; height:400px; background:#121922; border-radius:12px; margin-bottom:32px; background-size:contain; background-repeat:no-repeat; background-position:center; background-image:url('данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg')"></div>
+                <div class="idea-image-full" style="width:100%; aspect-ratio:16/9; background:#121922; border-radius:12px; margin-bottom:32px; background-size:cover; background-repeat:no-repeat; background-position:center; background-image:url('данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg')"></div>
 
-                <div class="idea-poem">
-                    ${данные.описание.стих.replace(/\n/g, '<br>')}
-                </div>
-
-                <div class="description-section">
-                    <h5>Для детей</h5>
-                    <div class="description-content">${данные.описание.ребенок}</div>
-                </div>
-
-                <div class="description-section">
-                    <h5>Для взрослых</h5>
-                    <div class="description-content">${данные.описание.взрослый}</div>
-                </div>
-
-                <div class="description-section">
-                    <h5>В бизнесе</h5>
-                    <div class="description-content">${данные.описание.бизнес}</div>
-                </div>
-
-                <div class="description-section">
-                    <h5>Метафора</h5>
-                    <div class="description-content">${данные.описание.метафора}</div>
-                </div>
+                ${описаниеHtml}
                 
                 <button class="btn btn-secondary" style="margin-top:20px" onclick="выбратьАвтора('${СОСТОЯНИЕ.автор}')">← НАЗАД К СПИСКУ</button>
             </div>
