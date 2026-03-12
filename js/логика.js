@@ -1,6 +1,6 @@
 /**
- * ГНОСТИКА — Ядро логики v2
- * Динамическая загрузка данных из иерархической структуры папок.
+ * ГНОСТИКА — Ядро логики v5.0
+ * Полная мобильная поддержка + динамическая загрузка данных
  */
 
 const СОСТОЯНИЕ = {
@@ -10,30 +10,106 @@ const СОСТОЯНИЕ = {
     админ: false
 };
 
-// Инициализация при загрузке
+// =====================================================================
+// УТИЛИТЫ
+// =====================================================================
+function isMobile() {
+    return window.innerWidth <= 1024;
+}
+
+function ideaToId(name, index) {
+    return String(index).padStart(3, '0') + '_' + name.replace(/ /g, '_');
+}
+
+// =====================================================================
+// ИНИЦИАЛИЗАЦИЯ
+// =====================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Гностика запущена');
+    console.log('Гностика v5 запущена');
     загрузитьГлобальноеМеню();
+    показатьГлавную();
 });
 
-async function загрузитьГлобальноеМеню() {
+// =====================================================================
+// ГЛАВНАЯ СТРАНИЦА (приветствие)
+// =====================================================================
+function показатьГлавную() {
+    document.getElementById('stage').innerHTML = `
+        <div class="home-welcome">
+            <div class="welcome-icon">📚</div>
+            <h2>ГНОСТИКА</h2>
+            <p>Выберите автора в меню слева, чтобы начать изучение его философских идей, книг и дистинкций.</p>
+        </div>
+    `;
+    document.getElementById('breadcrumb').innerText = 'Главная';
+    document.getElementById('info-panel').classList.add('hidden');
+    document.getElementById('info-panel').classList.remove('panel-open');
+}
+
+// =====================================================================
+// УПРАВЛЕНИЕ САЙДБАРАМИ (мобильная логика)
+// =====================================================================
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const isOpen = sidebar.classList.contains('open');
+
+    if (isOpen) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    } else {
+        sidebar.classList.add('open');
+        if (isMobile()) {
+            overlay.classList.add('active');
+        }
+    }
+}
+
+function closeSidebars() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+    // Также закрываем правую панель
+    const infoPanel = document.getElementById('info-panel');
+    infoPanel.classList.remove('panel-open');
+}
+
+function closeInfoPanel() {
+    const infoPanel = document.getElementById('info-panel');
+    infoPanel.classList.remove('panel-open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+}
+
+function showInfoPanelMobile() {
+    if (isMobile()) {
+        const infoPanel = document.getElementById('info-panel');
+        infoPanel.classList.add('panel-open');
+        document.getElementById('sidebar-overlay').classList.add('active');
+    }
+}
+
+// =====================================================================
+// ГЛОБАЛЬНОЕ МЕНЮ (левый сайдбар)
+// =====================================================================
+function загрузитьГлобальноеМеню() {
     const навигация = document.getElementById('sidebar-nav');
-    
-    // Глобальная структура авторов по направлениям
+    if (!навигация) return;
+
     const МЕНЮ = [
         {
-            категория: "ПРОБУЖДЕНИЕ И ОСНОВЫ",
+            категория: "ПРОБУЖДЕНИЕ",
             авторы: [
                 { id: "Георгий_Гурджиев", имя: "ГЕОРГИЙ ГУРДЖИЕВ" },
                 { id: "Вернер_Эрхард", имя: "ВЕРНЕР ЭРХАРД" },
                 { id: "Нисаргадатта_Махарадж", имя: "НИСАРГАДАТТА МАХАРАДЖ" },
                 { id: "УГ_Кришнамурти", имя: "У.Г. КРИШНАМУРТИ" },
-                { id: "Руперт_Спайра", имя: "РУПЕРТ СПАЙРА" }
+                { id: "Руперт_Спайра", имя: "РУПЕРТ СПАЙРА" },
+                { id: "Роберт_Антон_Уилсон", имя: "РОБЕРТ АНТОН УИЛСОН" }
             ]
         },
         {
             категория: "ТРАНСФОРМАЦИЯ",
             авторы: [
+                { id: "Вим_Хоф", имя: "ВИМ ХОФ" }
             ]
         },
         {
@@ -42,7 +118,8 @@ async function загрузитьГлобальноеМеню() {
                 { id: "Рассел_Акофф", имя: "РАССЕЛ АКОФФ" },
                 { id: "Питер_Сенге", имя: "ПИТЕР СЕНГЕ" },
                 { id: "Донелла_Медоуз", имя: "ДОНЕЛЛА МЕДОУЗ" },
-                { id: "Джон_ОКоннор", имя: "ДЖОН О'КОННОР" }
+                { id: "Джон_ОКоннор", имя: "ДЖОН О'КОННОР" },
+                { id: "Адамс_Джеймс", имя: "АДАМС ДЖЕЙМС" }
             ]
         },
         {
@@ -50,13 +127,16 @@ async function загрузитьГлобальноеМеню() {
             авторы: [
                 { id: "Питер_Друкер", имя: "ПИТЕР ДРУКЕР" },
                 { id: "Том_Питерс", имя: "ТОМ ПИТЕРС" },
-                { id: "Китами_Масао", имя: "КИТАМИ МАСАО" }
+                { id: "Китами_Масао", имя: "КИТАМИ МАСАО" },
+                { id: "Рикардо_Семлер", имя: "РИКАРДО СЕМЛЕР" }
             ]
         },
         {
-            категория: "НАУКА",
+            категория: "НАУКА И СОЗНАНИЕ",
             авторы: [
-                { id: "Дональд_Хоффман", имя: "ДОНАЛЬД ХОФФМАН" }
+                { id: "Дональд_Хоффман", имя: "ДОНАЛЬД ХОФФМАН" },
+                { id: "Дуглас_Хофштадтер", имя: "ДУГЛАС ХОФШТАДТЕР" },
+                { id: "Павел_Флоренский", имя: "ПАВЕЛ ФЛОРЕНСКИЙ" }
             ]
         },
         {
@@ -72,80 +152,145 @@ async function загрузитьГлобальноеМеню() {
             ]
         },
         {
-            категория: "ЭЗОТЕРИКА И ОСМЫСЛЕНИЕ",
+            категория: "ЭЗОТЕРИКА",
             авторы: [
                 { id: "Л_Секлитова_и_Л_Стрельникова", имя: "Л. СЕКЛИТОВА И Л. СТРЕЛЬНИКОВА" }
             ]
         }
     ];
-    
+
     let html = '';
-    
-    МЕНЮ.forEach(группа => {
-        // Заголовок категории
-        html += `<div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px 12px;">${группа.категория}</div>`;
-        
-        // Список авторов
+
+    МЕНЮ.forEach((группа, индекс) => {
+        const catId = 'cat-' + индекс;
+        const isExpanded = индекс === 0;
+        const arrowClass = isExpanded ? 'expanded' : 'collapsed';
+        const itemsClass = isExpanded ? '' : 'collapsed';
+
+        html += `
+            <div class="cat-header" onclick="toggleCategory('${catId}')">
+                <span>${группа.категория}</span>
+                <span class="cat-arrow ${arrowClass}" id="arrow-${catId}">▼</span>
+            </div>
+            <div class="cat-items ${itemsClass}" id="${catId}">
+        `;
+
         группа.авторы.forEach(автор => {
             html += `
-                <div class="nav-item ${автор.id === СОСТОЯНИЕ.автор ? 'active' : ''}" id="nav-${автор.id}" onclick="выбратьАвтора('${автор.id}')">
+                <div class="nav-item" id="nav-${автор.id}" onclick="выбратьАвтора('${автор.id}')">
                     ${автор.имя}
                 </div>
             `;
         });
+
+        html += `</div>`;
     });
-    
+
     навигация.innerHTML = html;
 }
 
+window.toggleCategory = function (catId) {
+    const el = document.getElementById(catId);
+    const arrow = document.getElementById('arrow-' + catId);
+    if (!el || !arrow) return;
+
+    if (el.classList.contains('collapsed')) {
+        el.classList.remove('collapsed');
+        arrow.classList.remove('collapsed');
+        arrow.classList.add('expanded');
+    } else {
+        el.classList.add('collapsed');
+        arrow.classList.remove('expanded');
+        arrow.classList.add('collapsed');
+    }
+};
+
+// =====================================================================
+// ВЫБОР АВТОРА
+// =====================================================================
 let ТЕКУЩИЕ_ДАННЫЕ = null;
+let ТЕКУЩАЯ_ИДЕЯ_ДАННЫЕ = null;
 
 async function выбратьАвтора(имяПапки) {
     СОСТОЯНИЕ.автор = имяПапки;
-    
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+    // Подсветка активного автора
+    document.querySelectorAll('#sidebar-nav .nav-item').forEach(el => el.classList.remove('active'));
     const activeNav = document.getElementById(`nav-${имяПапки}`);
     if (activeNav) activeNav.classList.add('active');
+
+    // На мобильном — закрываем левый сайдбар
+    if (isMobile()) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    }
 
     try {
         const ответ = await fetch(`данные/${имяПапки}/инфо.json`);
         if (!ответ.ok) throw new Error('Данные не найдены');
         const данные = await ответ.json();
-        ТЕКУЩИЕ_ДАННЫЕ = данные;
-        
-        // Обновляем хлебные крошки
-        document.getElementById('breadcrumb').innerText = данные.имя;
-        
-        // Отрисовываем сетку категорий или идей
+        document.getElementById('breadcrumb').innerText = '';
+        document.getElementById('filter-toggle-btn').style.display = isMobile() ? 'block' : 'none';
         отрисоватьСеткуИдей(данные);
-        
-        // Показываем правую панель с инфо об авторе
         показатьИнфоАвтора(данные);
     } catch (e) {
-        // Если автора еще нет в базе
         document.getElementById('stage').innerHTML = `
-            <div style="text-align:center; padding: 50px; color: var(--text-secondary);">
-                <h2>Материалы автора в разработке</h2>
-                <p>Мы еще не загрузили идеи для ${имяПапки.replace('_', ' ')}.</p>
+            <div class="home-welcome">
+                <div class="welcome-icon">🔨</div>
+                <h2>В РАЗРАБОТКЕ</h2>
+                <p>Материалы автора ${имяПапки.replace(/_/g, ' ')} ещё формируются.</p>
             </div>
         `;
         document.getElementById('info-panel').classList.add('hidden');
-        document.getElementById('breadcrumb').innerText = имяПапки.replace('_', ' ');
+        document.getElementById('info-panel').classList.remove('panel-open');
+        document.getElementById('breadcrumb').innerText = '';
+        document.getElementById('filter-toggle-btn').style.display = 'none';
     }
 }
 
+// =====================================================================
+// СЕТКА ИДЕЙ
+// =====================================================================
 function отрисоватьСеткуИдей(данные, фильтрКатегория = null) {
     const сцена = document.getElementById('stage');
-    let html = '<div class="ideas-grid">';
-    
-    данные.группы.forEach(группа => {
-        группа.категории.forEach(кат => {
+    let html = '';
+
+    данные.группы.forEach((группа, индексГруппы) => {
+        let groupHasMatchingCategories = группа.категории.some(к => !фильтрКатегория || к.название === фильтрКатегория);
+        if (!groupHasMatchingCategories) return;
+
+        if (!фильтрКатегория) {
+            html += `<h2 style="color:var(--accent-color);margin:24px 0 16px;text-transform:uppercase;font-size:16px;letter-spacing:1px;border-bottom:1px solid var(--border-color);padding-bottom:8px;">${группа.название}</h2>`;
+        }
+
+        группа.категории.forEach((кат, индексКат) => {
             if (фильтрКатегория && кат.название !== фильтрКатегория) return;
-            
-            кат.идеи.forEach((идея, индекс) => {
-                const id = ideaToId(идея, индекс + 1);
+
+            const containerId = `ideas-cat-${индексГруппы}-${индексКат}`;
+            const isAllIdeas = !фильтрКатегория;
+
+            if (isAllIdeas) {
                 html += `
-                    <div class="idea-card" onclick="открытьИдею('${id}', '${идея}')">
+                    <div class="ideas-category-block" style="margin-bottom:24px;">
+                        <div class="cat-header" style="margin-bottom:12px;background:var(--hover-bg);border-radius:6px;padding:10px 14px;cursor:pointer;" onclick="toggleIdeasGrid('${containerId}')">
+                            <span style="font-weight:600;font-size:14px;color:#fff;">${кат.название}</span>
+                            <span class="cat-arrow expanded" id="arrow-${containerId}">▼</span>
+                        </div>
+                        <div class="ideas-grid" id="${containerId}">
+                `;
+            } else {
+                html += `
+                    <div class="ideas-category-block" style="margin-bottom:24px;">
+                        <h3 style="margin-bottom:16px;color:#fff;font-size:20px;">${кат.название}</h3>
+                        <div class="ideas-grid" id="${containerId}">
+                `;
+            }
+
+            кат.идеи.forEach((идея, индексИдеи) => {
+                const id = ideaToId(идея, индексИдеи + 1);
+                const safeIdea = идея.replace(/'/g, "\\'");
+                html += `
+                    <div class="idea-card" onclick="открытьИдею('${id}', '${safeIdea}')">
                         <div class="idea-card-img" style="background-image: url('данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg')"></div>
                         <div class="idea-card-content">
                             <h4>${идея}</h4>
@@ -153,101 +298,121 @@ function отрисоватьСеткуИдей(данные, фильтрКат
                     </div>
                 `;
             });
+
+            html += `
+                        </div>
+                    </div>
+            `;
         });
     });
-    
-    html += '</div>';
+
     сцена.innerHTML = html;
 }
 
+window.toggleIdeasGrid = function (containerId) {
+    const el = document.getElementById(containerId);
+    const arrow = document.getElementById('arrow-' + containerId);
+    if (!el || !arrow) return;
+
+    if (el.style.display === 'none') {
+        el.style.display = 'grid';
+        arrow.innerText = '▼';
+        arrow.style.transform = 'rotate(0deg)';
+    } else {
+        el.style.display = 'none';
+        arrow.innerText = '►';
+        arrow.style.transform = 'rotate(-90deg)';
+    }
+};
+
 function фильтроватьПоКатегории(названиеКатегории) {
-    document.getElementById('breadcrumb').innerText = `${ТЕКУЩИЕ_ДАННЫЕ.имя} > ${названиеКатегории}`;
-    отрисоватьСеткуИдей(ТЕКУЩИЕ_ДАННЫЕ, названиеКатегории);
-    
-    // Подсвечиваем активный пункт
-    document.querySelectorAll('#author-nav .nav-item').forEach(el => {
-        el.classList.remove('active');
-        if (el.innerText === названиеКатегории) {
-            el.classList.add('active');
-        }
-    });
+    if (!названиеКатегории) {
+        document.getElementById('breadcrumb').innerText = '';
+        отрисоватьСеткуИдей(ТЕКУЩИЕ_ДАННЫЕ);
+    } else {
+        document.getElementById('breadcrumb').innerText = названиеКатегории;
+        отрисоватьСеткуИдей(ТЕКУЩИЕ_ДАННЫЕ, названиеКатегории);
+    }
+    if (isMobile()) {
+        closeInfoPanel();
+    }
 }
 
-
-function ideaToId(name, index) {
-    return String(index).padStart(3, '0') + '_' + name.replace(/ /g, '_');
-}
-
-// Глобальная переменная для хранения загруженных данных идеи
-let ТЕКУЩАЯ_ИДЕЯ_ДАННЫЕ = null;
-
+// =====================================================================
+// ДЕТАЛЬНЫЙ ВИД ИДЕИ
+// =====================================================================
 async function открытьИдею(id, name) {
     const путь = `данные/${СОСТОЯНИЕ.автор}/идеи/${id}/описание.json`;
     let данные = {};
-    
-    // Пытаемся загрузить текстовые данные идеи
+
     try {
         const ответ = await fetch(путь);
         if (ответ.ok) {
             данные = await ответ.json();
         }
     } catch (e) {
-        console.warn('Файл описание.json не найден. Открывается только ОБРАЗ.');
+        console.warn('описание.json не найден');
     }
-    
+
     ТЕКУЩАЯ_ИДЕЯ_ДАННЫЕ = {
         название: name,
         id: id,
         ...данные
     };
-    
+
     document.getElementById('breadcrumb').innerText = `${СОСТОЯНИЕ.автор.replace(/_/g, ' ')} > ${name}`;
-    
+
     const сцена = document.getElementById('stage');
-    
+    const safeAuthor = СОСТОЯНИЕ.автор;
+
     сцена.innerHTML = `
         <div class="idea-detail">
-            <!-- Вкладки (Tabs) -->
             <div class="idea-tabs-container">
-                <button class="idea-tab active" onclick="переключитьВкладкуИдеи('ОБРАЗ')">ОБРАЗ</button>
-                <button class="idea-tab" onclick="переключитьВкладкуИдеи('СТИХИ')">СТИХИ</button>
-                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ПРИТЧИ')">ПРИТЧИ</button>
-                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ПРИМЕРЫ')">ПРИМЕРЫ</button>
-                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ДИСТИНКЦИИ')">ДИСТИНКЦИИ</button>
-                <button class="idea-tab" onclick="переключитьВкладкуИдеи('МЕТАФОРЫ')">МЕТАФОРЫ</button>
-                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ОПИСАНИЕ')">ОПИСАНИЕ</button>
+                <button class="idea-tab active" onclick="переключитьВкладкуИдеи('ОБРАЗ', this)">ОБРАЗ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ОПИСАНИЕ', this)">ОПИСАНИЕ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('СТИХИ', this)">СТИХИ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ПРИТЧИ', this)">ПРИТЧИ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ПРИМЕРЫ', this)">ПРИМЕРЫ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ДИСТИНКЦИИ', this)">ДИСТИНКЦИИ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('МЕТАФОРЫ', this)">МЕТАФОРЫ</button>
             </div>
-            
-            <h2 class="idea-title" style="text-align: left; margin-top: 10px; margin-bottom: 20px;">${name}</h2>
-            
-            <!-- Контейнер для меняющегося контента -->
+
+            <h2 class="idea-title">${name}</h2>
+
             <div id="idea-content-area" class="idea-content-area">
-                <!-- По умолчанию ОБРАЗ -->
-                <img src="данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg" style="width:100%; border-radius:8px; display:block;" onerror="this.onerror=null; this.src=''; this.alt='ОБРАЗ НЕ ЗАГРУЖЕН'; this.style.backgroundColor='#121922'; this.style.aspectRatio='1/1'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center'; this.style.color='#fff';">
+                <img src="данные/${safeAuthor}/идеи/${id}/рисунки/1.jpg"
+                     style="width:100%;border-radius:10px;display:block;cursor:pointer;"
+                     onclick="window.open(this.src,'_blank')"
+                     onerror="this.onerror=null;this.alt='Изображение не загружено';this.style.backgroundColor='#121922';this.style.aspectRatio='1/1';">
             </div>
-            
-            <button class="btn btn-secondary" style="margin-top:40px" onclick="выбратьАвтора('${СОСТОЯНИЕ.автор}')">← НАЗАД К СПИСКУ</button>
+
+            <button class="btn btn-secondary" style="margin-top:32px" onclick="выбратьАвтора('${safeAuthor}')">← НАЗАД К СПИСКУ</button>
         </div>
     `;
 }
 
-// Глобальная функция для переключения вкладок
-window.переключитьВкладкуИдеи = function(вкладка) {
-    if (!event) return;
-    
-    // Управление подсветкой вкладок
+// =====================================================================
+// ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ИДЕИ
+// =====================================================================
+window.переключитьВкладкуИдеи = function (вкладка, btnEl) {
+    // Подсветка вкладки
     document.querySelectorAll('.idea-tab').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    
+    if (btnEl) btnEl.classList.add('active');
+
     const area = document.getElementById('idea-content-area');
+    if (!area) return;
     const данные = ТЕКУЩАЯ_ИДЕЯ_ДАННЫЕ;
+    if (!данные) return;
     const описание = данные.описание || {};
-    
+
     if (вкладка === 'ОБРАЗ') {
-        area.innerHTML = `<img src="данные/${СОСТОЯНИЕ.автор}/идеи/${данные.id}/рисунки/1.jpg" style="width:100%; border-radius:8px; display:block;" onerror="this.onerror=null; this.src=''; this.alt='ОБРАЗ НЕ ЗАГРУЖЕН';">`;
+        area.innerHTML = `<img src="данные/${СОСТОЯНИЕ.автор}/идеи/${данные.id}/рисунки/1.jpg"
+             style="width:100%;border-radius:10px;display:block;cursor:pointer;"
+             onclick="window.open(this.src,'_blank')"
+             onerror="this.onerror=null;this.alt='Изображение не загружено';">`;
         return;
     }
-    
+
     const mapKeys = {
         'СТИХИ': ['стих'],
         'ПРИТЧИ': ['притча'],
@@ -255,57 +420,168 @@ window.переключитьВкладкуИдеи = function(вкладка) {
         'ДИСТИНКЦИИ': ['дистинкция'],
         'МЕТАФОРЫ': ['метафора']
     };
-    
+
     let html = '';
-    
-    // Специальная вкладка ОПИСАНИЕ собирает всё остальное
+
     if (вкладка === 'ОПИСАНИЕ') {
         let knownKeys = ['стих', 'притча', 'примеры из жизни', 'примеры из бизнеса', 'примеры из работы', 'дистинкция', 'метафора'];
-        let hasCustomInfo = false;
-        
+        let hasContent = false;
+
+        // Сначала текст из корня
+        if (данные.текст) {
+            html += `<div class="description-section"><h5>СУТЬ ИДЕИ</h5><div class="description-content">${форматТекст(данные.текст)}</div></div>`;
+            hasContent = true;
+        }
+        // Потом доп. поля из описание
         for (const [key, value] of Object.entries(описание)) {
             if (!knownKeys.includes(key) && typeof value === 'string') {
-                const title = key.toUpperCase();
-                html += `<div class="description-section"><h5>${title}</h5><div class="description-content">${value.replace(/\\n/g, '<br>')}</div></div>`;
-                hasCustomInfo = true;
+                html += `<div class="description-section"><h5>${key.toUpperCase()}</h5><div class="description-content">${форматТекст(value)}</div></div>`;
+                hasContent = true;
             }
         }
-        
-        if (!hasCustomInfo && данные.текст) {
-            html += `<div class="description-section"><h5>СУТЬ ИДЕИ</h5><div class="description-content">${данные.текст.replace(/\\n/g, '<br>')}</div></div>`;
-            hasCustomInfo = true;
-        }
-        
-        if (!hasCustomInfo) {
-            html = `<div style="text-align:center; padding: 50px; color: var(--text-secondary);">Дополнительное описание пока не добавлено.</div>`;
+
+        if (!hasContent) {
+            html = `<div style="text-align:center;padding:40px;color:var(--text-secondary);">Описание будет добавлено позже.</div>`;
         }
     } else {
         const keys = mapKeys[вкладка];
         let found = false;
-        
+
         if (keys) {
             keys.forEach(k => {
                 if (описание[k]) {
-                    const title = k.toUpperCase();
-                    html += `<div class="description-section"><h5>${title}</h5><div class="description-content">${описание[k].replace(/\\n/g, '<br>')}</div></div>`;
+                    html += `<div class="description-section"><h5>${k.toUpperCase()}</h5><div class="description-content">${форматТекст(описание[k])}</div></div>`;
                     found = true;
                 }
             });
         }
-        
+
         if (!found) {
-            html = `<div style="text-align:center; padding: 50px; color: var(--text-secondary);">Материалы раздела «${вкладка}» находятся в разработке.</div>`;
+            html = `<div style="text-align:center;padding:40px;color:var(--text-secondary);">Раздел «${вкладка}» в разработке.</div>`;
         }
     }
-    
+
     area.innerHTML = html;
+};
+
+function форматТекст(text) {
+    if (!text) return '';
+    return text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
 }
 
-// Функции интерфейса
-function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('open');
+// =====================================================================
+// ПРАВАЯ ПАНЕЛЬ (информация об авторе)
+// =====================================================================
+function показатьИнфоАвтора(данные) {
+    const панель = document.getElementById('info-panel');
+    панель.classList.remove('hidden');
+
+    document.getElementById('author-name').innerText = данные.имя;
+    document.getElementById('author-role').innerText = данные.роль || 'АВТОР';
+
+    const photoEl = document.getElementById('author-photo');
+    if (данные.фото) {
+        photoEl.style.backgroundImage = `url('${данные.фото}')`;
+        photoEl.style.display = 'block';
+        photoEl.onclick = () => открытьПрофильАвтора(СОСТОЯНИЕ.автор);
+        photoEl.title = 'Открыть биографию';
+    } else {
+        photoEl.style.display = 'none';
+        photoEl.style.backgroundImage = '';
+        photoEl.onclick = null;
+    }
+
+    // Навигация по категориям
+    const навигация = document.getElementById('author-nav');
+    let html = `<div class="nav-item active" style="font-weight:600;margin-bottom:12px;" onclick="фильтроватьПоКатегории('')">ВСЕ ИДЕИ</div>`;
+
+    данные.группы.forEach(группа => {
+        html += `<div class="author-group-title">${группа.название}</div>`;
+        группа.категории.forEach(кат => {
+            const safeCat = кат.название.replace(/'/g, "\\'");
+            html += `<div class="nav-item" onclick="фильтроватьПоКатегории('${safeCat}')">${кат.название}</div>`;
+        });
+    });
+
+    навигация.innerHTML = html;
+
+    // На мобильном — не открываем правую панель автоматически
+    if (!isMobile()) {
+        панель.classList.remove('panel-open');
+    }
 }
 
+// =====================================================================
+// ПРОФИЛЬ АВТОРА (полноэкранная биография + книги)
+// =====================================================================
+window.открытьПрофильАвтора = async function (авторId) {
+    if (!авторId) авторId = СОСТОЯНИЕ.автор;
+    const данные = ТЕКУЩИЕ_ДАННЫЕ;
+    if (!данные) return;
+
+    let профиль = {};
+    try {
+        const ответ = await fetch(`данные/${авторId}/профиль.json`);
+        if (ответ.ok) {
+            профиль = await ответ.json();
+        }
+    } catch (e) { }
+
+    document.getElementById('breadcrumb').innerText = `${данные.имя} > БИОГРАФИЯ`;
+    const сцена = document.getElementById('stage');
+
+    // Левая колонка — портрет + книги
+    let leftHtml = `<img src="${данные.фото}" alt="Портрет" style="width:100%;border-radius:12px;margin-bottom:20px;" onerror="this.style.display='none'">`;
+
+    if (профиль.книги && профиль.книги.length > 0) {
+        leftHtml += `<h3 style="font-size:15px;color:var(--accent-color);margin-bottom:10px;border-bottom:1px solid var(--border-color);padding-bottom:6px;">ИЗДАННЫЕ КНИГИ</h3>`;
+        профиль.книги.forEach(book => {
+            leftHtml += `
+                <div class="book-card">
+                    ${book.обложка ? `<img src="${book.обложка}" style="width:70px;height:100px;object-fit:cover;border-radius:4px;flex-shrink:0;">` : '<div style="width:70px;height:100px;background:var(--hover-bg);border-radius:4px;flex-shrink:0;"></div>'}
+                    <div style="min-width:0;">
+                        <h4 style="margin:0 0 4px;font-size:13px;color:#fff;line-height:1.3;">${book.название}</h4>
+                        <p style="margin:0;font-size:12px;color:var(--text-secondary);line-height:1.4;">${book.описание || ''}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // Правая колонка — биография
+    let rightHtml = `<h2 style="font-size:clamp(22px,4vw,32px);margin:0 0 8px;color:#fff;text-transform:uppercase;">${данные.имя}</h2>`;
+    rightHtml += `<div style="color:var(--accent-color);font-weight:600;letter-spacing:2px;margin-bottom:24px;font-size:12px;">${данные.роль || 'АВТОР'}</div>`;
+
+    if (профиль.достижения && профиль.достижения.length > 0) {
+        rightHtml += `<div style="margin-bottom:24px;background:var(--hover-bg);padding:16px;border-radius:10px;">
+            <h4 style="margin:0 0 10px;color:#fff;font-size:14px;">ВКЛАД И ОСНОВНЫЕ ИДЕИ</h4>
+            <ul style="padding-left:18px;color:var(--text-secondary);margin:0;line-height:1.6;font-size:14px;">
+                ${профиль.достижения.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('')}
+            </ul>
+        </div>`;
+    }
+
+    if (профиль.биография) {
+        let bioText = Array.isArray(профиль.биография) ? профиль.биография.join('<br><br>') : профиль.биография;
+        rightHtml += `<div style="font-size:15px;line-height:1.8;color:var(--text-secondary);">${bioText}</div>`;
+    } else {
+        rightHtml += `<div style="font-size:15px;color:var(--text-secondary);">Биография в процессе подготовки...</div>`;
+    }
+
+    сцена.innerHTML = `
+        <div class="author-profile-grid">
+            <div class="author-profile-left">${leftHtml}</div>
+            <div>${rightHtml}</div>
+        </div>
+        <div style="padding:20px 0;text-align:left;">
+            <button class="btn btn-secondary" onclick="выбратьАвтора('${авторId}')">← НАЗАД К ИДЕЯМ</button>
+        </div>
+    `;
+};
+
+// =====================================================================
+// ФУНКЦИИ ИНТЕРФЕЙСА
+// =====================================================================
 function openAuth() {
     document.getElementById('auth-ov').classList.remove('hidden');
 }
@@ -320,119 +596,33 @@ function checkAuth() {
         СОСТОЯНИЕ.админ = true;
         document.getElementById('admin-controls').classList.remove('hidden');
         closeAuth();
-        alert('Режим администратора активирован');
     } else {
         alert('Неверный пароль');
     }
 }
 
 function goHome() {
-    location.reload();
+    СОСТОЯНИЕ.автор = null;
+    document.querySelectorAll('#sidebar-nav .nav-item').forEach(el => el.classList.remove('active'));
+    показатьГлавную();
+    document.getElementById('filter-toggle-btn').style.display = 'none';
+    if (isMobile()) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    }
 }
 
-function показатьИнфоАвтора(данные) {
-    const панель = document.getElementById('info-panel');
-    панель.classList.remove('hidden');
-    document.getElementById('author-name').innerText = данные.имя;
-    document.getElementById('author-role').innerText = данные.роль || "АВТОР";
-    
-    // Загрузка фото автора, если указано в JSON
-    const photoEl = document.getElementById('author-photo');
-    if (данные.фото) {
-        photoEl.style.backgroundImage = `url('${данные.фото}')`;
-        photoEl.style.display = 'block';
-        photoEl.style.cursor = 'pointer';
-        photoEl.onclick = () => открытьПрофильАвтора(СОСТОЯНИЕ.автор);
-        photoEl.title = "Нажмите, чтобы открыть профиль автора";
+// При resize — на мобильном убираем .open, чтобы sidebar не налезал
+window.addEventListener('resize', () => {
+    if (isMobile()) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+
+    // Показываем/скрываем кнопку фильтров
+    if (СОСТОЯНИЕ.автор) {
+        document.getElementById('filter-toggle-btn').style.display = isMobile() ? 'block' : 'none';
     } else {
-        photoEl.style.display = 'none';
-        photoEl.style.backgroundImage = '';
-        photoEl.onclick = null;
+        document.getElementById('filter-toggle-btn').style.display = 'none';
     }
-    
-    // Заполняем группы
-    const навигация = document.getElementById('author-nav');
-    let html = `<div class="nav-item active" style="margin-bottom: 20px; font-weight: 600;" onclick="фильтроватьПоКатегории('')">ВСЕ ИДЕИ</div>`;
-    
-    данные.группы.forEach(группа => {
-        html += `<div class="author-group-title">${группа.название}</div>`;
-        группа.категории.forEach(кат => {
-            html += `<div class="nav-item" onclick="фильтроватьПоКатегории('${кат.название}')">${кат.название}</div>`;
-        });
-    });
-    
-    навигация.innerHTML = html;
-}
-
-window.открытьПрофильАвтора = async function(авторId) {
-    if (!авторId) авторId = СОСТОЯНИЕ.автор;
-    const данные = ТЕКУЩИЕ_ДАННЫЕ;
-    if (!данные) return;
-
-    let профиль = {};
-    try {
-        const ответ = await fetch(`данные/${авторId}/профиль.json`);
-        if (ответ.ok) {
-            профиль = await ответ.json();
-        }
-    } catch(e) {}
-
-    document.getElementById('breadcrumb').innerText = `${данные.имя.toUpperCase()} > БИОГРАФИЯ И КНИГИ`;
-    const сцена = document.getElementById('stage');
-    
-    let galleryHtml = `<img src="${данные.фото}" alt="Портрет" style="width:100%; border-radius:12px; margin-bottom: 20px;">`;
-    
-    if (профиль.фотографии && профиль.фотографии.length > 0) {
-        профиль.фотографии.forEach(photo => {
-            galleryHtml += `<img src="${photo}" style="width:100%; border-radius:12px; margin-bottom: 10px;">`;
-        });
-    }
-
-    if (профиль.книги && профиль.книги.length > 0) {
-        galleryHtml += `<h3 style="margin-top: 20px; font-size: 16px; margin-bottom: 10px; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">ИЗДАННЫЕ КНИГИ</h3>`;
-        профиль.книги.forEach(book => {
-            galleryHtml += `
-                <div class="book-card" style="display: flex; gap: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
-                    ${book.обложка ? `<img src="${book.обложка}" style="width: 80px; height: 110px; object-fit: cover; border-radius: 4px;">` : '<div style="width: 80px; height: 110px; background: var(--hover-bg); border-radius: 4px;"></div>'}
-                    <div>
-                        <h4 style="margin: 0 0 5px 0; font-size: 14px; color: #fff;">${book.название}</h4>
-                        <p style="margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.4;">${book.описание || ''}</p>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    let bioHtml = `<h2 style="font-size: 32px; margin-top: 0; margin-bottom: 10px; color: #fff; text-transform: uppercase;">${данные.имя}</h2>`;
-    bioHtml += `<div style="color: var(--accent-color); font-weight: 600; letter-spacing: 2px; margin-bottom: 30px;">${данные.роль || 'АВТОР'}</div>`;
-    
-    if (профиль.достижения && профиль.достижения.length > 0) {
-        bioHtml += `<div style="margin-bottom: 30px; background: var(--hover-bg); padding: 20px; border-radius: 8px;">
-            <h4 style="margin-top: 0; margin-bottom: 15px; color: #fff; font-size: 16px;">ВКЛАД И ОСНОВНЫЕ ИДЕИ</h4>
-            <ul style="padding-left: 20px; color: var(--text-secondary); margin: 0; line-height: 1.6;">
-                ${профиль.достижения.map(d => `<li style="margin-bottom: 5px;">${d}</li>`).join('')}
-            </ul>
-        </div>`;
-    }
-
-    if (профиль.биография) {
-        let text = Array.isArray(профиль.биография) ? профиль.биография.join('<br><br>') : профиль.биография;
-        bioHtml += `<div style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); text-align: justify;">${text}</div>`;
-    } else {
-        bioHtml += `<div style="font-size: 16px; line-height: 1.8; color: var(--text-secondary);">Подробная биография и материалы находятся в разработке...</div>`;
-    }
-
-    сцена.innerHTML = `
-        <div class="author-profile-container" style="display: flex; gap: 40px; text-align: left; padding: 20px;">
-            <div class="author-gallery" style="flex: 0 0 320px; max-height: calc(100vh - 180px); overflow-y: auto; padding-right: 15px;">
-                ${galleryHtml}
-            </div>
-            <div class="author-bio" style="flex: 1; max-height: calc(100vh - 180px); overflow-y: auto; padding-right: 15px;">
-                ${bioHtml}
-            </div>
-        </div>
-        <div style="padding: 20px; border-top: 1px solid var(--border-color);">
-            <button class="btn btn-secondary" onclick="выбратьАвтора('${авторId}')">← НАЗАД К СПИСКУ ИДЕЙ</button>
-        </div>
-    `;
-};
+});
