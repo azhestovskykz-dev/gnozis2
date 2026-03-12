@@ -246,8 +246,47 @@ h1, h2, h3 {
 /* ДЕТАЛЬНЫЙ ВИД ИДЕИ */
 .idea-detail {
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     animation: fadeIn 0.5s ease;
+}
+
+/* Вкладки Идеи */
+.idea-tabs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.idea-tab {
+    background: transparent;
+    color: #9DB2E5;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.idea-tab:hover {
+    color: #fff;
+}
+
+.idea-tab.active {
+    background: #1946B9;
+    color: #fff;
+}
+
+.idea-content-area {
+    width: 100%;
+    margin: 0 auto;
+    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
@@ -325,13 +364,13 @@ h1, h2, h3 {
 }
 
 .author-avatar {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
+    width: 120px;
+    height: 150px;
+    border-radius: 6px;
     background-color: var(--card-bg);
-    margin: 0 auto 16px;
+    margin: 0 auto 16px; /* Kept 'margin: 0 auto 16px;' for centering */
     background-size: cover;
-    background-position: center;
+    background-position: center top;
     border: 3px solid var(--card-bg);
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }

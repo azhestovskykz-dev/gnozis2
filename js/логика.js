@@ -170,56 +170,127 @@ function ideaToId(name, index) {
     return String(index).padStart(3, '0') + '_' + name.replace(/ /g, '_');
 }
 
+// Глобальная переменная для хранения загруженных данных идеи
+let ТЕКУЩАЯ_ИДЕЯ_ДАННЫЕ = null;
+
 async function открытьИдею(id, name) {
     const путь = `данные/${СОСТОЯНИЕ.автор}/идеи/${id}/описание.json`;
+    let данные = {};
+    
+    // Пытаемся загрузить текстовые данные идеи
     try {
         const ответ = await fetch(путь);
-        const данные = await ответ.json();
-        
-        document.getElementById('breadcrumb').innerText = `${СОСТОЯНИЕ.автор.replace('_', ' ')} > ${name}`;
-        
-        let описаниеHtml = '';
-        if (данные.описание) {
-            if (данные.описание.стих) {
-                описаниеHtml += `<div class="idea-poem">${данные.описание.стих.replace(/\\n/g, '<br>')}</div>`;
-            }
-            if (данные.описание.притча) {
-                описаниеHtml += `<div class="description-section"><h5>Притча</h5><div class="description-content">${данные.описание.притча.replace(/\\n/g, '<br>')}</div></div>`;
-            }
-            for (const [ключ, значение] of Object.entries(данные.описание)) {
-                if (ключ !== 'стих' && ключ !== 'притча') {
-                    const заголовок = ключ.charAt(0).toUpperCase() + ключ.slice(1);
-                    описаниеHtml += `
-                    <div class="description-section">
-                        <h5>${заголовок}</h5>
-                        <div class="description-content">${значение.replace(/\\n/g, '<br>')}</div>
-                    </div>
-                    `;
-                }
-            }
-        } else if (данные.текст) {
-            описаниеHtml += `
-            <div class="description-section">
-                <h5>Суть идеи</h5>
-                <div class="description-content">${данные.текст.replace(/\\n/g, '<br>')}</div>
-            </div>
-            `;
+        if (ответ.ok) {
+            данные = await ответ.json();
         }
-
-        сцена.innerHTML = `
-            <div class="idea-detail">
-                <h2 class="idea-title" style="text-align: center;">${данные.идея || данные.название}</h2>
-                
-                <div class="idea-image-full" style="width:100%; max-width: 600px; aspect-ratio:1/1; background:#121922; border-radius:12px; margin: 0 auto 32px auto; background-size:cover; background-repeat:no-repeat; background-position:center; background-image:url('данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg')"></div>
-
-                ${описаниеHtml}
-                
-                <button class="btn btn-secondary" style="margin-top:20px" onclick="выбратьАвтора('${СОСТОЯНИЕ.автор}')">← НАЗАД К СПИСКУ</button>
-            </div>
-        `;
     } catch (e) {
-        alert('Описание для этой идеи еще не создано. Переходим в режим генерации...');
+        console.warn('Файл описание.json не найден. Открывается только ОБРАЗ.');
     }
+    
+    ТЕКУЩАЯ_ИДЕЯ_ДАННЫЕ = {
+        название: name,
+        id: id,
+        ...данные
+    };
+    
+    document.getElementById('breadcrumb').innerText = `${СОСТОЯНИЕ.автор.replace(/_/g, ' ')} > ${name}`;
+    
+    const сцена = document.getElementById('stage');
+    
+    сцена.innerHTML = `
+        <div class="idea-detail">
+            <!-- Вкладки (Tabs) -->
+            <div class="idea-tabs-container">
+                <button class="idea-tab active" onclick="переключитьВкладкуИдеи('ОБРАЗ')">ОБРАЗ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('СТИХИ')">СТИХИ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ПРИТЧИ')">ПРИТЧИ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ПРИМЕРЫ')">ПРИМЕРЫ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ДИСТИНКЦИИ')">ДИСТИНКЦИИ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('МЕТАФОРЫ')">МЕТАФОРЫ</button>
+                <button class="idea-tab" onclick="переключитьВкладкуИдеи('ОПИСАНИЕ')">ОПИСАНИЕ</button>
+            </div>
+            
+            <h2 class="idea-title" style="text-align: left; margin-top: 10px; margin-bottom: 20px;">${name}</h2>
+            
+            <!-- Контейнер для меняющегося контента -->
+            <div id="idea-content-area" class="idea-content-area">
+                <!-- По умолчанию ОБРАЗ -->
+                <img src="данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg" style="width:100%; border-radius:8px; display:block;" onerror="this.onerror=null; this.src=''; this.alt='ОБРАЗ НЕ ЗАГРУЖЕН'; this.style.backgroundColor='#121922'; this.style.aspectRatio='1/1'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center'; this.style.color='#fff';">
+            </div>
+            
+            <button class="btn btn-secondary" style="margin-top:40px" onclick="выбратьАвтора('${СОСТОЯНИЕ.автор}')">← НАЗАД К СПИСКУ</button>
+        </div>
+    `;
+}
+
+// Глобальная функция для переключения вкладок
+window.переключитьВкладкуИдеи = function(вкладка) {
+    if (!event) return;
+    
+    // Управление подсветкой вкладок
+    document.querySelectorAll('.idea-tab').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    const area = document.getElementById('idea-content-area');
+    const данные = ТЕКУЩАЯ_ИДЕЯ_ДАННЫЕ;
+    const описание = данные.описание || {};
+    
+    if (вкладка === 'ОБРАЗ') {
+        area.innerHTML = `<img src="данные/${СОСТОЯНИЕ.автор}/идеи/${данные.id}/рисунки/1.jpg" style="width:100%; border-radius:8px; display:block;" onerror="this.onerror=null; this.src=''; this.alt='ОБРАЗ НЕ ЗАГРУЖЕН';">`;
+        return;
+    }
+    
+    const mapKeys = {
+        'СТИХИ': ['стих'],
+        'ПРИТЧИ': ['притча'],
+        'ПРИМЕРЫ': ['примеры из жизни', 'примеры из бизнеса', 'примеры из работы'],
+        'ДИСТИНКЦИИ': ['дистинкция'],
+        'МЕТАФОРЫ': ['метафора']
+    };
+    
+    let html = '';
+    
+    // Специальная вкладка ОПИСАНИЕ собирает всё остальное
+    if (вкладка === 'ОПИСАНИЕ') {
+        let knownKeys = ['стих', 'притча', 'примеры из жизни', 'примеры из бизнеса', 'примеры из работы', 'дистинкция', 'метафора'];
+        let hasCustomInfo = false;
+        
+        for (const [key, value] of Object.entries(описание)) {
+            if (!knownKeys.includes(key) && typeof value === 'string') {
+                const title = key.toUpperCase();
+                html += `<div class="description-section"><h5>${title}</h5><div class="description-content">${value.replace(/\\n/g, '<br>')}</div></div>`;
+                hasCustomInfo = true;
+            }
+        }
+        
+        if (!hasCustomInfo && данные.текст) {
+            html += `<div class="description-section"><h5>СУТЬ ИДЕИ</h5><div class="description-content">${данные.текст.replace(/\\n/g, '<br>')}</div></div>`;
+            hasCustomInfo = true;
+        }
+        
+        if (!hasCustomInfo) {
+            html = `<div style="text-align:center; padding: 50px; color: var(--text-secondary);">Дополнительное описание пока не добавлено.</div>`;
+        }
+    } else {
+        const keys = mapKeys[вкладка];
+        let found = false;
+        
+        if (keys) {
+            keys.forEach(k => {
+                if (описание[k]) {
+                    const title = k.toUpperCase();
+                    html += `<div class="description-section"><h5>${title}</h5><div class="description-content">${описание[k].replace(/\\n/g, '<br>')}</div></div>`;
+                    found = true;
+                }
+            });
+        }
+        
+        if (!found) {
+            html = `<div style="text-align:center; padding: 50px; color: var(--text-secondary);">Материалы раздела «${вкладка}» находятся в разработке.</div>`;
+        }
+    }
+    
+    area.innerHTML = html;
 }
 
 // Функции интерфейса
@@ -255,7 +326,17 @@ function показатьИнфоАвтора(данные) {
     const панель = document.getElementById('info-panel');
     панель.classList.remove('hidden');
     document.getElementById('author-name').innerText = данные.имя;
-    document.getElementById('author-role').innerText = данные.роль;
+    document.getElementById('author-role').innerText = данные.роль || "АВТОР";
+    
+    // Загрузка фото автора, если указано в JSON
+    const photoEl = document.getElementById('author-photo');
+    if (данные.фото) {
+        photoEl.style.backgroundImage = `url('${данные.фото}')`;
+        photoEl.style.display = 'block';
+    } else {
+        photoEl.style.display = 'none';
+        photoEl.style.backgroundImage = '';
+    }
     
     // Заполняем группы
     const навигация = document.getElementById('author-nav');
