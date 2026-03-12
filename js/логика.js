@@ -58,7 +58,6 @@ function отрисоватьСеткуИдей(данные) {
                         <div class="idea-card-img" style="background-image: url('данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg')"></div>
                         <div class="idea-card-content">
                             <h4>${идея}</h4>
-                            <p>${кат.название}</p>
                         </div>
                     </div>
                 `;
