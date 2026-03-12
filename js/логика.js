@@ -251,40 +251,24 @@ async function выбратьАвтора(имяПапки) {
 // =====================================================================
 // СЕТКА ИДЕЙ
 // =====================================================================
-function отрисоватьСеткуИдей(данные, фильтрКатегория = null) {
+function отрисоватьСеткуИдей(данные) {
     const сцена = document.getElementById('stage');
     let html = '';
 
     данные.группы.forEach((группа, индексГруппы) => {
-        let groupHasMatchingCategories = группа.категории.some(к => !фильтрКатегория || к.название === фильтрКатегория);
-        if (!groupHasMatchingCategories) return;
-
-        if (!фильтрКатегория) {
-            html += `<h2 style="color:var(--accent-color);margin:24px 0 16px;text-transform:uppercase;font-size:16px;letter-spacing:1px;border-bottom:1px solid var(--border-color);padding-bottom:8px;">${группа.название}</h2>`;
-        }
+        html += `<h2 style="color:var(--accent-color);margin:24px 0 16px;text-transform:uppercase;font-size:16px;letter-spacing:1px;border-bottom:1px solid var(--border-color);padding-bottom:8px;">${группа.название}</h2>`;
 
         группа.категории.forEach((кат, индексКат) => {
-            if (фильтрКатегория && кат.название !== фильтрКатегория) return;
-
             const containerId = `ideas-cat-${индексГруппы}-${индексКат}`;
-            const isAllIdeas = !фильтрКатегория;
 
-            if (isAllIdeas) {
-                html += `
-                    <div class="ideas-category-block" style="margin-bottom:24px;">
-                        <div class="cat-header" style="margin-bottom:12px;background:var(--hover-bg);border-radius:6px;padding:10px 14px;cursor:pointer;" onclick="toggleIdeasGrid('${containerId}')">
-                            <span style="font-weight:600;font-size:14px;color:#fff;">${кат.название}</span>
-                            <span class="cat-arrow expanded" id="arrow-${containerId}">▼</span>
-                        </div>
-                        <div class="ideas-grid" id="${containerId}">
-                `;
-            } else {
-                html += `
-                    <div class="ideas-category-block" style="margin-bottom:24px;">
-                        <h3 style="margin-bottom:16px;color:#fff;font-size:20px;">${кат.название}</h3>
-                        <div class="ideas-grid" id="${containerId}">
-                `;
-            }
+            html += `
+                <div class="ideas-category-block" style="margin-bottom:24px;">
+                    <div class="cat-header" style="margin-bottom:12px;background:var(--hover-bg);border-radius:6px;padding:10px 14px;cursor:pointer;" onclick="toggleIdeasGrid('${containerId}')">
+                        <span style="font-weight:600;font-size:14px;color:#fff;">${кат.название}</span>
+                        <span class="cat-arrow expanded" id="arrow-${containerId}">▼</span>
+                    </div>
+                    <div class="ideas-grid" id="${containerId}">
+            `;
 
             кат.идеи.forEach((идея, индексИдеи) => {
                 const id = ideaToId(идея, индексИдеи + 1);
@@ -325,18 +309,74 @@ window.toggleIdeasGrid = function (containerId) {
     }
 };
 
-function фильтроватьПоКатегории(названиеКатегории) {
-    if (!названиеКатегории) {
+window.фильтроватьПоКатегории = function(названиеКатегории, navEl) {
+    if (navEl) {
+        document.querySelectorAll('#author-nav .nav-item').forEach(el => el.classList.remove('active'));
+        navEl.classList.add('active');
+    }
+
+    // Возврат к сетке, если открыта детальная идея или профиль
+    if (document.querySelector('.idea-detail') || document.querySelector('.author-profile-grid')) {
         document.getElementById('breadcrumb').innerText = '';
         отрисоватьСеткуИдей(ТЕКУЩИЕ_ДАННЫЕ);
-    } else {
-        document.getElementById('breadcrumb').innerText = названиеКатегории;
-        отрисоватьСеткуИдей(ТЕКУЩИЕ_ДАННЫЕ, названиеКатегории);
     }
+
+    if (!названиеКатегории) {
+        // "ВСЕ ИДЕИ": разворачиваем абсолютно все разделы
+        const headers = document.querySelectorAll('.cat-header');
+        for (let el of headers) {
+            const match = el.getAttribute('onclick').match(/'([^']+)'/);
+            if (match) {
+                const grid = document.getElementById(match[1]);
+                const arrow = document.getElementById('arrow-' + match[1]);
+                if (grid && arrow) {
+                    grid.style.display = 'grid';
+                    arrow.innerText = '▼';
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        setTimeout(() => {
+            let targetY = 0;
+            const headers = document.querySelectorAll('.cat-header');
+            
+            for (let el of headers) {
+                const span = el.querySelector('span');
+                const match = el.getAttribute('onclick').match(/'([^']+)'/);
+                if (!span || !match) continue;
+
+                const grid = document.getElementById(match[1]);
+                const arrow = document.getElementById('arrow-' + match[1]);
+                
+                if (span.innerText.trim() === названиеКатегории.trim()) {
+                    // Разворачиваем целевую
+                    if (grid && arrow) {
+                        grid.style.display = 'grid';
+                        arrow.innerText = '▼';
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                    targetY = el.getBoundingClientRect().top + window.scrollY - 80;
+                } else {
+                    // Сворачиваем остальные
+                    if (grid && arrow) {
+                        grid.style.display = 'none';
+                        arrow.innerText = '►';
+                        arrow.style.transform = 'rotate(-90deg)';
+                    }
+                }
+            }
+            if (targetY > 0) {
+                window.scrollTo({ top: targetY, behavior: 'smooth' });
+            }
+        }, 50);
+    }
+    
     if (isMobile()) {
         closeInfoPanel();
     }
-}
+};
 
 // =====================================================================
 // ДЕТАЛЬНЫЙ ВИД ИДЕИ
@@ -491,15 +531,15 @@ function показатьИнфоАвтора(данные) {
         photoEl.onclick = null;
     }
 
-    // Навигация по категориям
+    // Навигация по категориям (Оглавление)
     const навигация = document.getElementById('author-nav');
-    let html = `<div class="nav-item active" style="font-weight:600;margin-bottom:12px;" onclick="фильтроватьПоКатегории('')">ВСЕ ИДЕИ</div>`;
+    let html = `<div class="nav-item active" style="font-weight:600;margin-bottom:12px;" onclick="фильтроватьПоКатегории('', this)">ВСЕ ИДЕИ</div>`;
 
     данные.группы.forEach(группа => {
         html += `<div class="author-group-title">${группа.название}</div>`;
         группа.категории.forEach(кат => {
             const safeCat = кат.название.replace(/'/g, "\\'");
-            html += `<div class="nav-item" onclick="фильтроватьПоКатегории('${safeCat}')">${кат.название}</div>`;
+            html += `<div class="nav-item" onclick="фильтроватьПоКатегории('${safeCat}', this)">${кат.название}</div>`;
         });
     });
 
