@@ -80,7 +80,7 @@ async function загрузитьГлобальноеМеню() {
         // Список авторов
         группа.авторы.forEach(автор => {
             html += `
-                <div class="nav-item" onclick="выбратьАвтора('${автор.id}')">
+                <div class="nav-item ${автор.id === СОСТОЯНИЕ.автор ? 'active' : ''}" id="nav-${автор.id}" onclick="выбратьАвтора('${автор.id}')">
                     ${автор.имя}
                 </div>
             `;
@@ -94,6 +94,11 @@ let ТЕКУЩИЕ_ДАННЫЕ = null;
 
 async function выбратьАвтора(имяПапки) {
     СОСТОЯНИЕ.автор = имяПапки;
+    
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const activeNav = document.getElementById(`nav-${имяПапки}`);
+    if (activeNav) activeNav.classList.add('active');
+
     try {
         const ответ = await fetch(`данные/${имяПапки}/инфо.json`);
         if (!ответ.ok) throw new Error('Данные не найдены');
@@ -203,9 +208,9 @@ async function открытьИдею(id, name) {
 
         сцена.innerHTML = `
             <div class="idea-detail">
-                <h2 class="idea-title">${данные.идея || данные.название}</h2>
+                <h2 class="idea-title" style="text-align: center;">${данные.идея || данные.название}</h2>
                 
-                <div class="idea-image-full" style="width:100%; aspect-ratio:16/9; background:#121922; border-radius:12px; margin-bottom:32px; background-size:cover; background-repeat:no-repeat; background-position:center; background-image:url('данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg')"></div>
+                <div class="idea-image-full" style="width:100%; max-width: 600px; aspect-ratio:1/1; background:#121922; border-radius:12px; margin: 0 auto 32px auto; background-size:cover; background-repeat:no-repeat; background-position:center; background-image:url('данные/${СОСТОЯНИЕ.автор}/идеи/${id}/рисунки/1.jpg')"></div>
 
                 ${описаниеHtml}
                 
